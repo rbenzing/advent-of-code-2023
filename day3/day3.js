@@ -3,18 +3,31 @@ const fs = require('fs');
 // Specify the path to your text file
 const filePath = './day3/day3.txt';
 
-// data lines
-const lines = fs.readFileSync(filePath, { encoding: 'utf8', flag: 'r' })
-    .split('\n')
-    .filter(Boolean);
-
-const opArray = ["+", "-", "*", "/", "#", "$", "@", "=", "%", "&"];
-
-var validNumbers = [];
-var dataMap = [];
-var skipIndex = 0;
-
 // Functions
+function validNumber(chr) {
+    if (chr === '.' || opArray.includes(chr)) {
+       return false;
+    }
+    return true;
+}
+
+function getFullNumber(idx, map) {
+    if (map[idx]) {
+        let firstNumber = map[idx];
+        let secondNumber = map[idx+1];
+        let thirdNumber = map[idx+2];
+        if (validNumber(thirdNumber)) {
+            return firstNumber + secondNumber + thirdNumber;
+        } else if (validNumber(secondNumber)) {
+            return firstNumber + secondNumber;
+        } else {
+            return firstNumber;
+        }
+    } else {
+        return false;
+    }
+}
+
 function checkNumberBounds(startIndex, endIndex, mapIndex, num) {
     // check top row if not top row
     if (mapIndex !== 0) {
@@ -44,19 +57,16 @@ function checkNumberBounds(startIndex, endIndex, mapIndex, num) {
             return true;
         }
     }
-
     // check left of start index
     if (startIndex !== 0 && opArray.includes(dataMap[mapIndex][startIndex - 1])) {
         console.log(num + ' hit on left start: ', dataMap[mapIndex][startIndex - 1]);
         return true;
     }
-
     // check right of end index
     if (endIndex !== dataMap[mapIndex].length && opArray.includes(dataMap[mapIndex][endIndex])) {
         console.log(num + ' hit on right end: ', dataMap[mapIndex][endIndex]);
         return true;
     }
-
     // check bottom row if not bottom row
     if (mapIndex !== (dataMap.length - 1)) {
         // check bottom start
@@ -89,31 +99,19 @@ function checkNumberBounds(startIndex, endIndex, mapIndex, num) {
     return false;
 }
 
-function validNumber(chr) {
-    if (chr === '.' || opArray.includes(chr)) {
-       return false;
-    }
-    return true;
-}
+//
+// --- Run Code ---
+//
+var validNumbers = [];
+var dataMap = [];
+var skipIndex = 0;
 
-function getFullNumber(idx, map) {
-    if (map[idx]) {
-        let firstNumber = map[idx];
-        let secondNumber = map[idx+1];
-        let thirdNumber = map[idx+2];
-        if (validNumber(thirdNumber)) {
-            return firstNumber + secondNumber + thirdNumber;
-        } else if (validNumber(secondNumber)) {
-            return firstNumber + secondNumber;
-        } else {
-            return firstNumber;
-        }
-    } else {
-        return false;
-    }
-}
+const lines = fs.readFileSync(filePath, { encoding: 'utf8', flag: 'r' })
+    .split('\n')
+    .filter(Boolean);
 
-// Run Code
+const opArray = ["+", "-", "*", "/", "#", "$", "@", "=", "%", "&"];
+
 lines.forEach(line => {
     dataMap.push(line.split(''));
 });
