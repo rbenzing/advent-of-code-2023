@@ -202,20 +202,20 @@ Card 200: 43 45 85 27 99 88 52 35 28  3 | 18 54 53 96 80 62 49 15 90 14 44 48 36
 Card 201: 71 92 68 45 33 17 99 32 96 93 | 90 82 79 26 20 85 94 61 31 84 73 30  4 87 29 28 81 27 75 39 36 58 97 98 21`;
 
 // run it
-var total = 0;
-const cards = data.split('\n').filter(Boolean);
-
+var total = [];
+const cards = data.replace(/Card.*:\s/gm, "").split('\n');
 cards.forEach(card => {
     const [winningNumbers, cardNumbers] = card.split('|');
-    console.log('Cards: ', cardNumbers);
+
     // Extract winning numbers and matching numbers as arrays of numbers
     const winningNumbersArray = winningNumbers.match(/\d+/gm).map(Number);
-    console.log('Winners: ', winningNumbersArray);
     const matchingNumbers = cardNumbers.match(/\d+/gm).map(Number).filter(number => winningNumbersArray.includes(number));
     console.log('Matched: ', matchingNumbers);
 
     if (matchingNumbers.length) {
-        total += Math.pow(2, matchingNumbers.length - 1);
+        total.push(Math.pow(2, matchingNumbers.length - 1));
     }
 });
-console.log('Part 1 - Total Points: ', total);
+const sum = total.reduce((acc, cur) => acc + cur, 0);
+console.log(total);
+console.log('Part 1 - Total Points: ', sum);
