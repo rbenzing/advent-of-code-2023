@@ -203,39 +203,37 @@ var data = `
 `;
 
 // test
-const testData = `
+/*const testData = `
 0 3 6 9 12 15
 1 3 6 10 15 21
 10 13 16 21 30 45
 `;
-data = testData;
+data = testData;*/
 
-var lines = data.trim().split('\n').map(l => l.trim().split(' ').map(Number));
-console.log(JSON.stringify(lines));
+const lines = data.trim().split("\n").map(line => line.trim().split(" ").map(Number));
 
-// functions
-const zeroIn = (lines) => {
-    var minusResult = [];
-    lines.forEach(l => {
-        let runArray = [];
-        for(i=0; i<=l.length - 1; i++) {
-            let x = i+1;
-            runArray.push(parseInt(l[x]) - parseInt(l[i]));
-        }
-        runArray.pop();
-        minusResult.push(runArray);
-    });
-    return minusResult;
-};
+const getMap = (data) => {
+    const result = [data];
+    
+    const difference = data.map((current, index, array) => 
+        index < array.length - 1 ? array[index + 1] - current : 0
+    ).slice(0, -1);
 
-const isNotZero = (lines) => {
-    return [].concat(...lines).reduce((acc, c) => parseInt(acc) + parseInt(c)) > 0;
-};
+    if (difference.some(item => item !== 0))
+        result.push(...getMap(difference));
 
-// run it
-var result = lines;
-while(isNotZero(result)) {
-    result = zeroIn(result);
-    console.log(JSON.stringify(result));
+    return result;
 }
 
+const process = data => data.map(row => row[row.length - 1]);
+
+const getNext = data => process(data).reduce((result, item) => result + item, 0);
+
+const result = lines.reduce((result, line) => {
+    const history = getMap(line);
+    const next = getNext(history);
+    result += next;
+    return result;
+}, 0);
+
+console.log(result);
