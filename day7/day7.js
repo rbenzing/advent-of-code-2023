@@ -1003,63 +1003,37 @@ Q4444 864
 `;
 
 // testing
-/*const testData = `
+const testData = `
 32T3K 765
 T55J5 684
 KK677 28
 KTJJT 220
 QQQJA 483
 `;
-data = testData;*/
+data = testData;
 
 // variables
 var total = 0;
-const games = {};
-const cardRank = {"2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, "9": 9, "T": 10, "J": 11, "Q": 12, "K": 13, "A": 14};
-const hands = data.trim().split("\n").map(game => game.split(" "))
+
+const cardRank = {"T": 10, "J": 11, "Q": 12, "K": 13, "A": 14};
+const games = data.trim().split("\n").map(game => game.split(" "))
+const hands = games.map(i => i[0]);
 
 // functions
-const handsWithRanks = hands.map(pair => {
-    const cards = Array.from(pair[0]).reduce((acc, card) => {
-        acc[card] = (acc[card] || 0) + 1;
-        return acc;
-    }, {});
-    const cardType = Object.values(cards);
-    const maxCount = Math.max(...cardType);
-    const secondMaxCount = Math.max(...cardType.filter(count => count !== maxCount));
-    let rank = 0;
-    switch (maxCount) {
-        case 5:
-            rank = 6;
-            break;
-        case 4:
-            rank = 5;
-            break;
-        case 3:
-            rank = (secondMaxCount === 2) ? 4 : (secondMaxCount === 1) ? 3 : 0;
-            break;
-        case 2:
-            rank = (secondMaxCount === 2) ? 2 : (secondMaxCount === 1) ? 1 : 0;
-            break;
-    }
-    return [...pair, rank];
-});
-
-const sortedHands = handsWithRanks.sort((handA, handB) => {
-    const typeDifference = handA[2] - handB[2];
-    if (typeDifference !== 0) {
-        return typeDifference;
-    }
-    for (let i = 0; i < handA[0].length; i++) {
-        const rankDifference = cardRank[handA[0][i]] - cardRank[handB[0][i]];
-        if (rankDifference !== 0) {
-            return rankDifference;
+const countCards = (hand) => {
+    let charactersToCount = ['A', 'K', 'Q', 'J', 'T', '2', '3', '4', '5', '6', '7', '8', '9'];
+    const characterCounts = {};
+    for (let i = 0; i < hand.length; i++) {
+        const currentChar = hand[i];
+        if (charactersToCount.includes(currentChar)) {
+            characterCounts[currentChar] = (characterCounts[currentChar] || 0) + 1;
         }
     }
-    return 0;
-});
+    return characterCounts;
+};
 
-// reduce it
-total = sortedHands.reduce((acc, c, index) =>  acc + (parseInt(c[1]) * (index + 1)), 0)
-console.log(JSON.stringify(sortedHands));
-console.log('Total: ', total);
+// run it
+hands.forEach(hand => {
+    let handCounts = countCards(hand);
+    console.log(handCounts);
+});

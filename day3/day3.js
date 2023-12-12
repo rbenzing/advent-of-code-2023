@@ -141,103 +141,36 @@ const data = `..........................................389.314.................
 ........................................782...............665......................532.......................998...991.702.542....406.779...`;
 
 // variables
-var validNumbers = [];
-var dataMap = [];
-var skipIndex = 0;
+const validNumbers = [];
+const rows = data.trim().split("\n");
 
-// methods
-const logHit = (num, start, end, left, right, middle) => {
-    if (start) console.log(num + ' hit on start.');
-    if (end) console.log(num + ' hit on end.');
-    if (left) console.log(num + ' hit on left.');
-    if (right) console.log(num + ' hit on right.');
-    if (middle) console.log(num + ' hit on middle.');
-};
+function getCells(line, index, length) {
+    const sliceStart = Math.max(index - 1, 0);
+    const sliceEnd = Math.min(index + length + 1, line.length);
+    return line.slice(sliceStart, sliceEnd);
+}
 
-const validNumber = (chr) => {
-    return chr !== '.' && !opArray.includes(chr);
-};
+rows.forEach((row, line) => {
+    const digits = row.matchAll(/\d+/g);
 
-const getFullNumber = (idx, map) => {
-    if (map[idx]) {
-        let firstNumber = map[idx];
-        let secondNumber = map[idx+1];
-        let thirdNumber = map[idx+2];
-        if (validNumber(thirdNumber)) {
-            return firstNumber + secondNumber + thirdNumber;
-        } else if (validNumber(secondNumber)) {
-            return firstNumber + secondNumber;
-        } else {
-            return firstNumber;
+    for (let digit of digits) {
+        const index = digit.index;
+        const number = parseInt(digit[0]);
+        const length = digit[0].length;
+
+        const prevLine = rows[line - 1] || '';
+        const nextLine = rows[line + 1] || '';
+
+        const cells = getCells(prevLine, index, length) +
+            (row[index - 1] || '') +
+            (row[index + length] || '') +
+            getCells(nextLine, index, length);
+
+        if (cells.replace(/\./g, "")) {
+            validNumbers.push(number);
         }
-    } else {
-        return false;
     }
-};
-
-const checkNumberBounds = (startIndex, endIndex, mapIndex, num) => {
-    const topRow = mapIndex !== 0;
-    const bottomRow = mapIndex !== dataMap.length - 1;
-    const topStart = topRow && opArray.includes(dataMap[mapIndex - 1][startIndex]);
-    const topEnd = topRow && opArray.includes(dataMap[mapIndex - 1][endIndex - 1]);
-    const topLeft = topRow && startIndex !== 0 && opArray.includes(dataMap[mapIndex - 1][startIndex - 1]);
-    const topRight = topRow && endIndex !== dataMap[mapIndex].length && opArray.includes(dataMap[mapIndex - 1][endIndex]);
-    const topMiddle = topRow && opArray.includes(dataMap[mapIndex - 1][endIndex - 2]);
-
-    if (topStart || topEnd || topLeft || topRight || topMiddle) {
-        logHit(num, topStart, topEnd, topLeft, topRight, topMiddle);
-        return true;
-    }
-
-    const leftStart = startIndex !== 0 && opArray.includes(dataMap[mapIndex][startIndex - 1]);
-    const rightEnd = endIndex !== dataMap[mapIndex].length && opArray.includes(dataMap[mapIndex][endIndex]);
-
-    if (leftStart || rightEnd) {
-        logHit(num, leftStart, false, false, rightEnd, false);
-        return true;
-    }
-
-    const bottomStart = bottomRow && opArray.includes(dataMap[mapIndex + 1][startIndex]);
-    const bottomEnd = bottomRow && opArray.includes(dataMap[mapIndex + 1][endIndex]);
-    const bottomLeft = bottomRow && startIndex !== 0 && opArray.includes(dataMap[mapIndex + 1][startIndex - 1]);
-    const bottomRight = bottomRow && startIndex !== 0 && opArray.includes(dataMap[mapIndex + 1][endIndex]);
-    const bottomMiddle = bottomRow && opArray.includes(dataMap[mapIndex + 1][endIndex - 2]);
-
-    if (bottomStart || bottomEnd || bottomLeft || bottomRight || bottomMiddle) {
-        logHit(num, bottomStart, bottomEnd, bottomLeft, bottomRight, bottomMiddle);
-        return true;
-    }
-
-    return false;
-};
-
-// run it
-const opArray = ["+", "-", "*", "/", "#", "$", "@", "=", "%", "&"];
-const lines = data.split('\n');
-
-lines.forEach(line => {
-    dataMap.push(line.split(''));
 });
 
-dataMap.forEach((map, mapIdx) => {
-    map.forEach((chr, chrIdx) => {
-        if (chr === '.' || chr === '\r' || opArray.includes(chr) || chrIdx !== 0 && chrIdx <= skipIndex) {
-            if(skipIndex !== 0 && skipIndex === chrIdx) {
-                skipIndex = 0;
-            }
-            return;
-        } else {
-            let num = getFullNumber(chrIdx, map);
-            if (num !== false) {
-                skipIndex = chrIdx + num.length;
-                if (checkNumberBounds(chrIdx, skipIndex, mapIdx, num)) {
-                    validNumbers.push(num);
-                } else {
-                    console.log(num + ' didnt hit.');
-                }
-            }
-        }
-    });
-});
-
-console.log('Total Sum: ', validNumbers.reduce((acc, count) => acc + parseInt(count), 0));
+const sum = validNumbers.reduce((result, item) => result + item, 0);
+console.log(sum);
